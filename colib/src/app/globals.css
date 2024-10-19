@@ -1,27 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* styles/globals.css */
+.centered {
+  text-align: center;
+  font-family: 'Hangyaboly', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.nav-icon {
+  cursor: pointer;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+.nav-icon .line1,
+.nav-icon .line2,
+.nav-icon .line3 {
+  width: 30px;
+  height: 5px;
+  background-color: #333;
+  margin: 6px 0;
+  transition: 0.4s;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.nav-icon .line1 {
+  transform: translateY(-10px);
 }
+
+.nav-icon .line3 {
+  transform: translateY(10px);
+}
+
+/* Add more styles as needed */
