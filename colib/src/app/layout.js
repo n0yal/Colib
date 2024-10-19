@@ -1,18 +1,14 @@
-// layout.js
-"use client";
-import './globals.css';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import './globals.css'
 
-export default function Layout({ children }) {
-    return (
-        <html lang="en">
-            <body>
-                <Header />
-                <main>{children}</main>
-                <Footer />
-            </body>
-        </html>
-    );
+export const metadata = {
+  title: 'Colib - Your Library App',
+  description: 'A modern library application for book lovers',
 }
 
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className="debug-screens">{children}</body>
+    </html>
+  )
+}
