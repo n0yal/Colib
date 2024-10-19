@@ -1,70 +1,94 @@
-// /src/app/create-table/page.js
+// /src/app/library_creation/page.js
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supaBaseclient";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function CreateTable() {
+export default function LibraryCreation() {
   const router = useRouter();
-  const [user, setUser] = useState(null); // Holds the logged-in user
-  const [isLoading, setIsLoading] = useState(true); // Manage loading state
-  const [message, setMessage] = useState(""); // Manage messages
+  const [libraryName, setLibraryName] = useState("");
+  const [books, setBooks] = useState([{ name: "" }]); // Store multiple books
+  const [location, setLocation] = useState({ latitude: null, longitude: null });
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      });
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
 
-      if (error) {
-        console.error("Error fetching session:", error.message);
-        setMessage("Error fetching user session.");
-        setIsLoading(false);
-        return;
-      }
+  const handleBookChange = (index, value) => {
+    const updatedBooks = [...books];
+    updatedBooks[index].name = value;
+    setBooks(updatedBooks);
+  };
 
-      if (data.session) {
-        setUser(data.session.user); // Set the user state if the session exists
-      } else {
-        setMessage("You need to be logged in to create a library.");
-        router.push("/login"); // Redirect to login if not authenticated
-      }
+  const addBookField = () => {
+    setBooks([...books, { name: "" }]);
+  };
 
-      setIsLoading(false); // Stop loading once session check is done
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const payload = {
+      libraryName,
+      books,
+      location,
     };
 
-    checkSession();
-  }, [router]);
-
-  // Function to keep session alive or handle token expiration
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT") {
-          router.push("/login"); // Redirect if user signs out
-        } else if (event === "SIGNED_IN") {
-          setUser(session.user); // Update user when signed in
-        }
-      }
+    // Use encodeURIComponent to safely pass the payload as a string in the URL
+    router.push(
+      `/pages/library_creation?data=${encodeURIComponent(
+        JSON.stringify(payload)
+      )}`
     );
-
-    return () => {
-      authListener.subscription.unsubscribe(); // Clean up the listener on unmount
-    };
-  }, [router]);
-
-  if (isLoading) {
-    return <div>Loading...</div>; // Show loading state
-  }
+  };
 
   return (
     <div>
-      <h1>Create Library</h1>
-      {message && <p>{message}</p>}
-      {user && (
+      <h1>Create a Library</h1>
+      <form onSubmit={handleSubmit}>
         <div>
-          {/* Add your form or logic to create the table */}
-          <p>Welcome, {user.email}! You are logged in.</p>
-          {/* UI to create the library/table goes here */}
+          <label>Library Name:</label>
+          <input
+            type="text"
+            value={libraryName}
+            onChange={(e) => setLibraryName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Books:</label>
+          {books.map((book, index) => (
+            <input
+              key={index}
+              type="text"
+              value={book.name}
+              placeholder={`Book ${index + 1}`}
+              onChange={(e) => handleBookChange(index, e.target.value)}
+              required
+            />
+          ))}
+          <button type="button" onClick={addBookField}>
+            Add Another Book
+          </button>
+        </div>
+
+        <button type="submit">Create Library</button>
+      </form>
+
+      {location.latitude && (
+        <div>
+          <p>
+            Location: {location.latitude}, {location.longitude}
+          </p>
         </div>
       )}
     </div>

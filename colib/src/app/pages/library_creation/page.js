@@ -1,101 +1,97 @@
+// /src/app/create-table/page.js
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "../../../lib/supaBaseclient";
 import { useRouter } from "next/navigation";
 
-export default function Library() {
-  const [tableName, setTableName] = useState("");
-  const [address, setAddress] = useState("");
-  const [books, setBooks] = useState([{ name: "" }]);
+export default function CreateTable() {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get the user's location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const long = position.coords.longitude;
+    const checkSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
 
-          // Fetch address using a reverse geocoding API
-          fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`
-          )
-            .then((response) => response.json())
-            .then((data) => setAddress(data.locality || "Unknown Location"))
-            .catch((error) => console.error("Error fetching address:", error));
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          setAddress("Unknown Location");
-        }
-      );
-    } else {
-      setAddress("Geolocation not supported");
-    }
-  }, []);
+      if (error) {
+        console.error("Error fetching session:", error.message);
+        setMessage("Error fetching user session.");
+        setIsLoading(false);
+        return;
+      }
 
-  const handleAddBook = () => {
-    setBooks([...books, { name: "" }]);
-  };
+      if (data.session) {
+        setUser(data.session.user);
+      } else {
+        setMessage("You need to be logged in to create a library.");
+        router.push("/login");
+      }
 
-  const handleBookChange = (index, value) => {
-    const updatedBooks = books.map((book, i) =>
-      i === index ? { name: value } : book
-    );
-    setBooks(updatedBooks);
-  };
-
-  const handleCreateLibrary = async () => {
-    const params = {
-      tableName,
-      address,
-      books: JSON.stringify(books),
+      setIsLoading(false);
     };
-    const query = new URLSearchParams(params).toString();
 
-    router.push(`/pages/create-table?${query}`);
-  };
+    checkSession();
+  }, [router]);
+
+  useEffect(() => {
+    const createLibraryTable = async () => {
+      const dataParam = searchParams.get("data");
+      if (!dataParam) {
+        setMessage("No data received.");
+        return;
+      }
+
+      // Parse the stringified JSON data back to an object
+      const { libraryName, books, location } = JSON.parse(
+        decodeURIComponent(dataParam)
+      );
+
+      // Create the table dynamically using Supabase SQL or the appropriate function
+      const { error: tableError } = await supabase.rpc("create_library", {
+        library_name: libraryName,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+
+      if (tableError) {
+        console.error("Error creating table:", tableError.message);
+        setMessage("Error creating table.");
+        return;
+      }
+
+      // Insert books into the new table
+      for (const book of books) {
+        const { error: insertError } = await supabase
+          .from(libraryName)
+          .insert({ book_name: book.name });
+
+        if (insertError) {
+          console.error("Error inserting book:", insertError.message);
+          setMessage("Error inserting books.");
+          return;
+        }
+      }
+
+      setMessage("Library and books created successfully!");
+    };
+
+    if (user) {
+      createLibraryTable();
+    }
+  }, [user, searchParams]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
-      <h1>Create a Library</h1>
-      <div>
-        <label>Library Name:</label>
-        <input
-          type="text"
-          value={tableName}
-          onChange={(e) => setTableName(e.target.value)}
-          placeholder="Enter library name"
-        />
-      </div>
-
-      <div>
-        <h2>Books</h2>
-        {books.map((book, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              placeholder="Book Name"
-              value={book.name}
-              onChange={(e) => handleBookChange(index, e.target.value)}
-            />
-          </div>
-        ))}
-        <button onClick={handleAddBook}>Add Another Book</button>
-      </div>
-
-      <div>
-        <label>Location (Address):</label>
-        <input type="text" value={address} readOnly />
-      </div>
-
-      <button
-        onClick={handleCreateLibrary}
-        disabled={!tableName || books.some((book) => !book.name)}
-      >
-        Create Library
-      </button>
+      <h1>Create Library</h1>
+      {message && <p>{message}</p>}
     </div>
   );
 }
