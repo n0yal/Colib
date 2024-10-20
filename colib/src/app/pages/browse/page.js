@@ -30,7 +30,7 @@ export default function BrowsePage() {
   return (
     <div className="min-h-screen bg-[#D4E7C5] p-8">
       <Head>
-        <title>Browse Supabase Tables</title>
+        <title>Colib Points</title>
         <meta
           name="description"
           content="Browse all tables in the Supabase database"
@@ -38,7 +38,7 @@ export default function BrowsePage() {
       </Head>
 
       <h1 className="text-3xl font-bold mb-8 text-[#99BC85]">
-        Supabase Tables
+        ALL COLIB POINTS
       </h1>
 
       {error ? (
@@ -60,7 +60,7 @@ export default function BrowsePage() {
 
       {tables.length === 0 && !error && (
         <div className="text-center text-[#99BC85] text-xl mt-8">
-          No tables found in the database.
+          No colib points found in the database.
         </div>
       )}
     </div>
