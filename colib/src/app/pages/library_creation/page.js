@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supaBaseclient";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 export default function CreateTable() {
   const searchParams = useSearchParams();
@@ -38,7 +39,7 @@ export default function CreateTable() {
 
   useEffect(() => {
     const createLibraryTable = async () => {
-      const dataParam = searchParams.get("data");
+      <Suspense>const dataParam = searchParams.get("data");</Suspense>;
       if (!dataParam) {
         setMessage("No data received.");
         return;
