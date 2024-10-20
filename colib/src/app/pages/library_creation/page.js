@@ -1,4 +1,3 @@
-// /src/app/create-table/page.js
 "use client";
 
 import { useEffect, useState } from "react";
@@ -57,6 +56,10 @@ export default function CreateTable() {
         longitude: location.longitude,
       });
 
+      // Log latitude and longitude for debugging
+      console.log("Latitude:", location.latitude);
+      console.log("Longitude:", location.longitude);
+
       if (tableError) {
         console.error("Error creating table:", tableError.message);
         setMessage("Error creating table.");
@@ -65,9 +68,13 @@ export default function CreateTable() {
 
       // Insert books into the new table
       for (const book of books) {
-        const { error: insertError } = await supabase
-          .from(libraryName)
-          .insert({ book_name: book.name });
+        const { error: insertError } = await supabase.from(libraryName).insert([
+          {
+            book_name: book.name,
+            location_latitude: location.latitude, // Use the correct variable
+            location_longitude: location.longitude, // Use the correct variable
+          },
+        ]);
 
         if (insertError) {
           console.error("Error inserting book:", insertError.message);

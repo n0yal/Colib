@@ -1,11 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+@font-face {
+  font-family: "The Seasons";
+  src: url("/fonts/the-seasons.woff2") format("woff2"),
+    url("/fonts/the-seasons.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary-color: #99BC85;
-  --secondary-color: #BFD8AF;
-  --background-color: #D4E7C5;
+  --primary-color: #99bc85;
+  --secondary-color: #bfd8af;
+  --background-color: #d4e7c5;
 }
 
 body {
@@ -23,7 +33,7 @@ body {
   font-family: sans-serif;
   background-color: #000;
   color: #fff;
-  content: 'CSS LOADED';
+  content: "CSS LOADED";
 }
 
 @layer base {
@@ -89,4 +99,7 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+.font-season {
+  font-family: "The Seasons", serif;
 }

@@ -1,67 +1,51 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Search, Book, User, Calendar, UserPlus, Users } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Search, Book, User } from 'lucide-react'
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
-  const redirecttoHost = () => {
-    // Redirect to the desired page
-    router.push("/pages/create-table");
-  };
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const redirecttoBrowse = () => {
-    // Redirect to the desired page
-    router.push("/pages/browse");
-  };
   return (
-    <div className="min-h-screen bg-[#D4E7C5] font-poppins">
+    <div className="min-h-screen bg-[#D4E7C5]">
       {/* Navbar */}
       <nav className="bg-[#99BC85] p-4 sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
-          <motion.h1
-            className="text-2xl font-bold text-white font-seasons"
+          <motion.h1 
+            className="text-2xl font-bold text-white"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             Colib
           </motion.h1>
-          <motion.div
+          <motion.div 
             className="flex space-x-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <a href="/" className="text-white hover:text-[#BFD8AF]">
-              Home
-            </a>
-            <a href="/books" className="text-white hover:text-[#BFD8AF]">
-              Profile
-            </a>
-            <a href="/about" className="text-white hover:text-[#BFD8AF]">
-              About
-            </a>
+            <a href="/" className="text-white hover:text-[#BFD8AF]">Home</a>
+            <a href="/books" className="text-white hover:text-[#BFD8AF]">Books</a>
+            <a href="/about" className="text-white hover:text-[#BFD8AF]">About</a>
           </motion.div>
         </div>
       </nav>
 
       {/* Main Content */}
       <main className="container mx-auto mt-10 px-4">
-        <motion.h2
-          className="text-4xl font-bold text-center mb-8 text-[#99BC85] font-seasons"
+        <motion.h2 
+          className="text-4xl font-bold text-center mb-8 text-[#99BC85]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          A Readers Paradise.
+          Welcome to Colib
         </motion.h2>
 
         {/* Search Bar */}
-        <motion.div
+        <motion.div 
           className="max-w-2xl mx-auto mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,10 +74,9 @@ export default function Home() {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            onClick={redirecttoBrowse}
           >
             <Book />
-            <span>Browse CoLib's</span>
+            <span>Browse Books</span>
           </motion.button>
           <motion.button
             className="bg-[#BFD8AF] text-white px-6 py-3 rounded-full flex items-center space-x-2 hover:bg-[#99BC85] transition duration-300"
@@ -102,57 +85,36 @@ export default function Home() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            onClick={redirecttoHost}
           >
             <User />
-            <span>Host CoLib.</span>
+            <span>My Account</span>
           </motion.button>
         </div>
 
-        {/* Featured Section */}
-        <motion.div
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8"
+        {/* Scrolling Content */}
+        <motion.div 
+          className="mt-16 space-y-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <FeaturedBox
-            title="Events"
-            icon={<Calendar className="w-8 h-8 text-[#99BC85]" />}
-            description="Join our upcoming book launches, author meet-and-greets, and literary discussions."
-          />
-          <FeaturedBox
-            title="New Author of the Week"
-            icon={<UserPlus className="w-8 h-8 text-[#99BC85]" />}
-            description="Discover fresh voices in literature. This week's featured author: Jane Doe."
-          />
-          <FeaturedBox
-            title="Reading Groups"
-            icon={<Users className="w-8 h-8 text-[#99BC85]" />}
-            description="Connect with fellow book lovers in our themed reading groups and book clubs."
-          />
+          {[1, 2, 3, 4, 5].map((item) => (
+            <motion.div
+              key={item}
+              className="bg-white p-6 rounded-lg shadow-md"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h3 className="text-xl font-semibold mb-2 text-[#99BC85]">Featured Book {item}</h3>
+              <p className="text-gray-600">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
+            </motion.div>
+          ))}
         </motion.div>
       </main>
     </div>
-  );
-}
-
-function FeaturedBox({ title, icon, description }) {
-  return (
-    <motion.div
-      className="bg-white p-6 rounded-lg shadow-md"
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="flex items-center mb-4">
-        {icon}
-        <h3 className="text-xl font-semibold ml-2 text-[#99BC85] font-seasons">
-          {title}
-        </h3>
-      </div>
-      <p className="text-gray-600">{description}</p>
-    </motion.div>
-  );
+  )
 }
