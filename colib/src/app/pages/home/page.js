@@ -17,6 +17,9 @@ export default function Home() {
     // Redirect to the desired page
     router.push("/pages/browse");
   };
+  const redirecttoAbout = () => {
+    router.push("/pages/about");
+  };
   return (
     <div className="min-h-screen bg-[#D4E7C5] font-poppins">
       {/* Navbar */}
@@ -42,7 +45,7 @@ export default function Home() {
             <a href="/books" className="text-white hover:text-[#BFD8AF]">
               Profile
             </a>
-            <a href="/about" className="text-white hover:text-[#BFD8AF]">
+            <a href="/pages/about" className="text-white hover:text-[#BFD8AF]">
               About
             </a>
           </motion.div>

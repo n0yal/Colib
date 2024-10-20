@@ -44,6 +44,7 @@ export default function CreateTable() {
         return;
       }
 
+      // Parse the stringified JSON data back to an object
       const { libraryName, books, location } = JSON.parse(
         decodeURIComponent(dataParam)
       );
@@ -51,8 +52,8 @@ export default function CreateTable() {
       // Create the table dynamically using Supabase SQL or the appropriate function
       const { error: tableError } = await supabase.rpc("create_library", {
         library_name: libraryName,
-        location_latitude: location.latitude,
-        location_longitude: location.longitude,
+        latitude: location.latitude,
+        longitude: location.longitude,
       });
 
       // Log latitude and longitude for debugging
@@ -63,30 +64,6 @@ export default function CreateTable() {
         console.error("Error creating table:", tableError.message);
         setMessage("Error creating table.");
         return;
-      }
-      // Insert books into the new table
-      for (const book of books) {
-        console.log("Inserting book data:", {
-          book_name: book.name,
-          location_latitude: location.latitude,
-          location_longitude: location.longitude,
-        });
-
-        const { data, error: insertError } = await supabase
-          .from(libraryName)
-          .insert([
-            {
-              book_name: book.name,
-              location_latitude: location.latitude,
-              location_longitude: location.longitude,
-            },
-          ]);
-
-        if (insertError) {
-          console.error("Error inserting book:", insertError); // Log the entire error object
-          setMessage(`Error inserting books: ${insertError.message}`); // Provide specific error message
-          return;
-        }
       }
 
       // Insert books into the new table
@@ -99,8 +76,8 @@ export default function CreateTable() {
         const { error: insertError } = await supabase.from(libraryName).insert([
           {
             book_name: book.name,
-            location_latitude: location.latitude,
-            location_longitude: location.longitude,
+            location_latitude: location.latitude, // Use the correct variable
+            location_longitude: location.longitude, // Use the correct variable
           },
         ]);
 
@@ -120,31 +97,13 @@ export default function CreateTable() {
   }, [user, searchParams]);
 
   if (isLoading) {
-    return <div className="text-center">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: "#D4E7C5" }}
-    >
-      <div
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
-        style={{ backgroundColor: "#BFD8AF" }}
-      >
-        <h1
-          className="text-2xl font-bold mb-4 text-center"
-          style={{ color: "#2C3E50" }}
-        >
-          Create Library
-        </h1>
-        {message && <p className="text-center text-red-600">{message}</p>}
-        <div className="mt-4">
-          <p className="text-center" style={{ color: "#34495E" }}>
-            This section allows you to create a new library and add books to it.
-          </p>
-        </div>
-      </div>
+    <div>
+      <h1>Create Library</h1>
+      {message && <p>{message}</p>}
     </div>
   );
 }
