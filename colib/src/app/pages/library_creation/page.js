@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supaBaseclient";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
 
 export default function CreateTable() {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Call the hook directly inside the component
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
@@ -37,88 +36,53 @@ export default function CreateTable() {
     checkSession();
   }, [router]);
 
+  const createLibraryTable = async () => {
+    const dataParam = searchParams.get("data");
+    if (!dataParam) {
+      setMessage("No data received.");
+      return;
+    }
+
+    const { libraryName, books, location } = JSON.parse(
+      decodeURIComponent(dataParam)
+    );
+
+    const { error: tableError } = await supabase.rpc("create_library", {
+      library_name: libraryName,
+      location_latitude: location.latitude,
+      location_longitude: location.longitude,
+    });
+
+    if (tableError) {
+      console.error("Error creating table:", tableError.message);
+      setMessage("Error creating table.");
+      return;
+    }
+
+    for (const book of books) {
+      const { error: insertError } = await supabase.from(libraryName).insert([
+        {
+          book_name: book.name,
+          location_latitude: location.latitude,
+          location_longitude: location.longitude,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error inserting book:", insertError.message);
+        setMessage("Error inserting books.");
+        return;
+      }
+    }
+
+    setMessage("Library and books created successfully!");
+  };
+
   useEffect(() => {
-    const createLibraryTable = async () => {
-      <Suspense>const dataParam = searchParams.get("data");</Suspense>;
-      if (!dataParam) {
-        setMessage("No data received.");
-        return;
-      }
-
-      const { libraryName, books, location } = JSON.parse(
-        decodeURIComponent(dataParam)
-      );
-
-      // Create the table dynamically using Supabase SQL or the appropriate function
-      const { error: tableError } = await supabase.rpc("create_library", {
-        library_name: libraryName,
-        location_latitude: location.latitude,
-        location_longitude: location.longitude,
-      });
-
-      // Log latitude and longitude for debugging
-      console.log("Latitude:", location.latitude);
-      console.log("Longitude:", location.longitude);
-
-      if (tableError) {
-        console.error("Error creating table:", tableError.message);
-        setMessage("Error creating table.");
-        return;
-      }
-      // Insert books into the new table
-      for (const book of books) {
-        console.log("Inserting book data:", {
-          book_name: book.name,
-          location_latitude: location.latitude,
-          location_longitude: location.longitude,
-        });
-
-        const { data, error: insertError } = await supabase
-          .from(libraryName)
-          .insert([
-            {
-              book_name: book.name,
-              location_latitude: location.latitude,
-              location_longitude: location.longitude,
-            },
-          ]);
-
-        if (insertError) {
-          console.error("Error inserting book:", insertError); // Log the entire error object
-          setMessage(`Error inserting books: ${insertError.message}`); // Provide specific error message
-          return;
-        }
-      }
-
-      // Insert books into the new table
-      for (const book of books) {
-        console.log("Inserting book data:", {
-          book_name: book.name,
-          location_latitude: location.latitude,
-          location_longitude: location.longitude,
-        });
-        const { error: insertError } = await supabase.from(libraryName).insert([
-          {
-            book_name: book.name,
-            location_latitude: location.latitude,
-            location_longitude: location.longitude,
-          },
-        ]);
-
-        if (insertError) {
-          console.error("Error inserting book:", insertError.message);
-          setMessage("Error inserting books.");
-          return;
-        }
-      }
-
-      setMessage("Library and books created successfully!");
-    };
-
     if (user) {
       createLibraryTable();
     }
-  }, [user, searchParams]);
+  }, [user]);
 
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
@@ -147,5 +111,14 @@ export default function CreateTable() {
         </div>
       </div>
     </div>
+  );
+}
+
+// In the parent component or wherever you render the page
+export function PageWithSuspense() {
+  return (
+    <Suspense fallback={<div>Loading search parameters...</div>}>
+      <CreateTable />
+    </Suspense>
   );
 }
