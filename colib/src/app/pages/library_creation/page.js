@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supaBaseclient";
 import { useRouter } from "next/navigation";
 
 export default function CreateTable() {
-  const searchParams = useSearchParams(); // Call the hook directly inside the component
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [dataParam, setDataParam] = useState(null);
+
+  // Function to fetch search params from URL
+  const getSearchParams = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("data");
+  };
 
   useEffect(() => {
     const checkSession = async () => {
@@ -36,8 +41,12 @@ export default function CreateTable() {
     checkSession();
   }, [router]);
 
+  useEffect(() => {
+    // Get the 'data' parameter from the URL and set it in state
+    setDataParam(getSearchParams());
+  }, []);
+
   const createLibraryTable = async () => {
-    const dataParam = searchParams.get("data");
     if (!dataParam) {
       setMessage("No data received.");
       return;
@@ -47,6 +56,7 @@ export default function CreateTable() {
       decodeURIComponent(dataParam)
     );
 
+    // Create the table dynamically using Supabase SQL or the appropriate function
     const { error: tableError } = await supabase.rpc("create_library", {
       library_name: libraryName,
       location_latitude: location.latitude,
@@ -59,6 +69,7 @@ export default function CreateTable() {
       return;
     }
 
+    // Insert books into the new table
     for (const book of books) {
       const { error: insertError } = await supabase.from(libraryName).insert([
         {
@@ -79,10 +90,10 @@ export default function CreateTable() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && dataParam) {
       createLibraryTable();
     }
-  }, [user]);
+  }, [user, dataParam]);
 
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
@@ -111,14 +122,5 @@ export default function CreateTable() {
         </div>
       </div>
     </div>
-  );
-}
-
-// In the parent component or wherever you render the page
-export function PageWithSuspense() {
-  return (
-    <Suspense fallback={<div>Loading search parameters...</div>}>
-      <CreateTable />
-    </Suspense>
   );
 }
